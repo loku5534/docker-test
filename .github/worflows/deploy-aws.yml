@@ -1,0 +1,27 @@
+name: Deploy React to AWS
+on: 
+  push: 
+    branches:
+      - "main"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Generate Deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: interior_Solution
+          environment_name: InteriorSolution-docker
+          version_label: ${{ github.sha }}
+          existing_bucket_name: elasticbeanstalk-ap-south-1-328546119498
+          region: ap-south-1
+          deployment_package: deploy.zip
